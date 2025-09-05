@@ -14,6 +14,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Logger;
 
+import javax.xml.crypto.Data;
+
 public class ServiceDao implements Dao<Service, UUID>{
   private static final Logger LOGGER = Logger.getLogger(ServiceDao.class.getName());
 
@@ -21,6 +23,7 @@ public class ServiceDao implements Dao<Service, UUID>{
   private static final String GET_BY_ID = "select service_id, name, price from wisdom.services where service_id = ?";
   private static final String CREATE = "insert into wisdom.services (service_id, name, price) values (?,?,?)";
   private static final String UPDATE = "update wisdom.services set name = ?, price = ? where service_id = ?";
+  private static final String DELETE = "delete from wisdom.services where service_id = ?";
 
   @Override
   public Service create(Service entity) {
@@ -53,7 +56,22 @@ public class ServiceDao implements Dao<Service, UUID>{
 
   @Override
   public void delete(UUID id) {
-    // TODO Auto-generated method stub
+    Connection connection = DatabaseUtils.getConnection();
+    try {
+      connection.setAutoCommit(false);
+      PreparedStatement statement = connection.prepareStatement(DELETE);
+      statement.setObject(1, id);
+      statement.execute();
+      connection.commit();
+      statement.close();
+    } catch (SQLException e) {
+      try {
+        connection.rollback();
+      } catch (SQLException sqle) {
+        DatabaseUtils.handleSqlException("ServiceDao.delete.rollback", sqle, LOGGER);
+      }
+      DatabaseUtils.handleSqlException("ServiceDao.delete", e, LOGGER);
+    }
     
   }
 
