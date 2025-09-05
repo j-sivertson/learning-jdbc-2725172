@@ -190,6 +190,6 @@ BEGIN
     product_price, 
     (select vendor_id from wisdom.vendors where UPPER(name) = UPPER(vendor_name))
   );
-  return prod_id;
+return prod_id;
 END;
 $BODY$;
